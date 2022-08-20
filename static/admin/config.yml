@@ -1,0 +1,63 @@
+backend:
+  name: github
+  repo: therepo
+  branch: main
+
+media_folder: static/assets
+public_folder: /assets
+
+aliases:
+  - slug: &slug
+      label: Slug
+      name: slug
+      widget: string
+      hint: "Lowercase with dashes and slashes"
+      pattern:
+        [
+          '^[a-z\-_\/]+$',
+          "Only lowercase letters with dashes and underscores and forward slashes are allowed.",
+        ]
+  - heading: &heading
+      label: Heading
+      name: heading
+      widget: markdown
+  - image_w_alt: &image_w_alt
+      label: Image with alt text
+      name: image_w_alt
+      widget: object
+      summary: "{{fields.image}} {{fields.image_alt}}"
+      fields:
+        - {
+            label: Image,
+            name: image,
+            widget: image,
+            choose_url: false,
+            allow_multiple: false,
+          }
+        - { label: Image Alt Text, name: image_alt, widget: text }
+
+# -- CMS Model --
+
+collections:
+  - label: Pages
+    name: pages
+    label_singular: Page
+    editor:
+      preview: true
+    folder: src/cms/content/pages
+    create: true
+    identifier_field: slug
+    slug: "{{fields.slug}}"
+    fields:
+      - *slug
+      - label: Components
+        name: components
+        widget: list
+        types:
+          - label: Centered Section
+            name: centered_section
+            widget: object
+            summary: "{{fields.heading}}"
+            fields:
+              - *heading
+              - *image_w_alt

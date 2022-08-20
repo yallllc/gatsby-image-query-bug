@@ -1,54 +1,29 @@
-<p align="center">
-  <a href="https://www.gatsbyjs.com/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts">
-    <img alt="Gatsby" src="https://www.gatsbyjs.com/Gatsby-Monogram.svg" width="60" />
-  </a>
-</p>
-<h1 align="center">
-  Gatsby minimal TypeScript starter
-</h1>
+# Gatsby GraphQL Image Query Bug Repro
 
-## 🚀 Quick start
+The Gatsby graph fails to query images in certain situations in a Netlify CMS project.
 
-1.  **Create a Gatsby site.**
+#### Repro Steps:
 
-    Use the Gatsby CLI to create a new site, specifying the minimal TypeScript starter.
+- `yarn` and `yarn develop`, the image will load fine in the dev server.
+- Open [GraphiQL](http://localhost:8000/___graphql) and paste the query from gatsby-node.ts
+- Bug! You'll see `"image": null` in GraphiQL.
 
-    ```shell
-    # create a new Gatsby site using the minimal TypeScript starter
-    npm init gatsby
-    ```
+#### Bug behavior:
 
-2.  **Start developing.**
+- Now open the file `src/cms/content/pages/home.md` and change the `type: centered_section`
+  to any other string -- the GraphiQL query succeeds!
+- It will continue to succeed after a change is made, even if you change it back.
 
-    Navigate into your new site’s directory and start it up.
+![screenshot](./null-image-bug.png)
 
-    ```shell
-    cd my-gatsby-site/
-    npm run develop
-    ```
+#### Build notes:
 
-3.  **Open the code and start customizing!**
+- Local builds never fail.
+- But Netlify builds _do_ exhibit the error, with a certain quirk. (They succeed when built
+  fresh but fail on cached rebuilds.) This is a new problem, builds worked on Gatsby 3.
 
-    Your site is now running at http://localhost:8000!
+#### Setup notes:
 
-    Edit `src/pages/index.tsx` to see your site update in real-time!
-
-4.  **Learn more**
-
-    - [Documentation](https://www.gatsbyjs.com/docs/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-    - [Tutorials](https://www.gatsbyjs.com/tutorial/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-    - [Guides](https://www.gatsbyjs.com/tutorial/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-    - [API Reference](https://www.gatsbyjs.com/docs/api-reference/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-    - [Plugin Library](https://www.gatsbyjs.com/plugins?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-    - [Cheat Sheet](https://www.gatsbyjs.com/docs/cheat-sheet/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter-ts)
-
-## 🚀 Quick start (Gatsby Cloud)
-
-Deploy this starter with one click on [Gatsby Cloud](https://www.gatsbyjs.com/cloud/):
-
-[<img src="https://www.gatsbyjs.com/deploynow.svg" alt="Deploy to Gatsby Cloud">](https://www.gatsbyjs.com/dashboard/deploynow?url=https://github.com/gatsbyjs/gatsby-starter-minimal-ts)
+- Uses the `gatsby-transformer-remark` plugin with the community plugin `gatsby-remark-relative-images`,
+  a workaround to fix relative image pathing from `static/`, something Netlify CMS doesn't handle.
+- An issue has been opened with the author of that plugin, but this problem arose at Gatsby 4.
