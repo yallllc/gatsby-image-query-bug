@@ -12,6 +12,7 @@ type PageTemplateProps = GatsbyPageProps<
 >;
 
 const PageTemplate: FC<PageTemplateProps> = ({ pageContext }) => {
+  // null image will show an error here
   const { gatsbyImageData } = pageContext.image.childImageSharp;
   const image = getImage(gatsbyImageData);
   return (
