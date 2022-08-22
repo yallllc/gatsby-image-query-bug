@@ -45,6 +45,7 @@ const config: GatsbyConfig = {
       options: {
         plugins: [
           {
+            /* This is needed for Netlify CMS to correctly source uploads from static */
             resolve: `gatsby-remark-relative-images`,
             options: { staticFolderName: "static" },
           },
@@ -55,9 +56,10 @@ const config: GatsbyConfig = {
         ],
       },
     },
+    /* We're using this but it's not important for the repro steps
     {
       resolve: "gatsby-plugin-netlify-cms",
-    },
+    }, */
   ],
 };
 

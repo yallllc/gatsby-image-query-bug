@@ -1,61 +1,41 @@
 import { GatsbyNode } from "gatsby";
 import path from "path";
 
-type QueryBlock<T = object> = { edges: { node: { frontmatter: T } }[] };
-
-/** The bug occurs with or without these typings, but this is how our project is typed */
+/** The bug occurs with or without these typings, but this is similar to how our project is typed */
 export const createSchemaCustomization: GatsbyNode["createSchemaCustomization"] =
   ({ actions }) => {
-    const { createTypes } = actions;
-    const typeDefs = `
-      type ImageWAlt {
-        image: File @fileByRelativePath
-        image_alt: String
-      }
-
-      type Components {
-        type: String
-        heading: String
-        image_w_alt: ImageWAlt
-      }
-
+    actions.createTypes(`
       type MarkdownRemarkFrontmatter {
-        slug: String!
-        components: [Components]
+        image: File @fileByRelativePath
+        alt: String
       }
-    `;
-    createTypes(typeDefs);
+    `);
   };
 
 export const createPages: GatsbyNode["createPages"] = async ({
   actions,
   graphql,
 }) => {
-  const { createPage, createRedirect } = actions;
-
   const result = await graphql<{
-    pages: QueryBlock<{ slug: string }>;
+    pages: { edges: { node: { frontmatter: object } }[] };
   }>(`
     {
       pages: allMarkdownRemark(
-        filter: { fileAbsolutePath: { regex: "/.*/cms/content/pages/.*/" } }
+        filter: {
+          fileAbsolutePath: { regex: "/.*/cms/content/pages/home.md/" }
+        }
       ) {
         edges {
           node {
             frontmatter {
               slug
-              components {
-                type
-                heading
-                image_w_alt {
-                  image {
-                    childImageSharp {
-                      gatsbyImageData
-                    }
-                  }
-                  image_alt
+              heading
+              image {
+                childImageSharp {
+                  gatsbyImageData
                 }
               }
+              alt
             }
           }
         }
@@ -63,20 +43,13 @@ export const createPages: GatsbyNode["createPages"] = async ({
     }
   `);
 
-  if (result.errors) {
-    return Promise.reject(result.errors);
+  const context = result.data?.pages.edges?.[0].node.frontmatter;
+  if (!context) {
+    return Promise.reject(`query failed ${JSON.stringify(result, null, 2)}`);
   }
-  if (!result.data?.pages?.edges?.length) {
-    return Promise.reject("createPages query failed: no data");
-  }
-
-  const pageData = result.data.pages.edges.map((e) => e.node.frontmatter);
-  pageData.forEach((data) => {
-    const pagePath = data.slug === "home" ? "/" : `/${data.slug}/`;
-    createPage({
-      path: pagePath,
-      component: path.resolve(`src/templates/page.tsx`),
-      context: data,
-    });
+  actions.createPage({
+    path: "/",
+    component: path.resolve(`src/templates/page.tsx`),
+    context,
   });
 };

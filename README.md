@@ -4,15 +4,12 @@ The Gatsby graph fails to query images in certain situations in a Netlify CMS pr
 
 #### Repro Steps:
 
-- `yarn` and `yarn develop`, the image will load fine in the dev server.
-- Open [GraphiQL](http://localhost:8000/___graphql) and paste the query from gatsby-node.ts
+- `yarn`, `yarn develop`, open [this GraphiQL query](<http://localhost:8000/___graphql?query=%7B%0A%20%20pages%3A%20allMarkdownRemark(%0A%20%20%20%20filter%3A%20%7B%0A%20%20%20%20%20%20fileAbsolutePath%3A%20%7B%0A%20%20%20%20%20%20regex%3A%20%22%2F.*%2Fcms%2Fcontent%2Fpages%2Fhome.md%2F%22%0A%20%20%20%20%7D%0A%20%20%7D)%20%7B%0A%20%20%20%20edges%20%7B%0A%20%20%20%20%20%20node%20%7B%0A%20%20%20%20%20%20%20%20frontmatter%20%7B%0A%20%20%20%20%20%20%20%20%20%20slug%0A%20%20%20%20%20%20%20%20%20%20heading%0A%20%20%20%20%20%20%20%20%20%20image%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20childImageSharp%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20gatsbyImageData%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20alt%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D>)
+  (or paste the `createPages` query from gatsby-node.ts)
 - Bug! You'll see `"image": null` in GraphiQL.
-
-#### Bug behavior:
-
-- Now open the file `src/cms/content/pages/home.md` and change the `type: centered_section`
-  to any other string -- the GraphiQL query succeeds!
-- It will continue to succeed after a change is made, even if you change it back.
+- Open [home.md](src/cms/content/pages/home.md) and make any change to `heading` or `alt`
+  -- GraphiQL query succeeds!
+- Restarting the dev server will reset the bug state
 
 ![screenshot](./null-image-bug.png)
 
