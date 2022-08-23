@@ -8,9 +8,7 @@ The Gatsby graph fails to query images in certain situations in a Netlify CMS pr
 - `yarn clean && yarn build`
   - succeeds with image
 - `yarn build` (again, this uses the cache)
-
   - fails on `null` image (`TypeError: Cannot read properties of null (reading 'childImageSharp')`)
-
 - `yarn clean && yarn develop`
   - image succeeds in frontend app
   - image is `null` in GraphiQL
