@@ -16,6 +16,10 @@ export const createPages: GatsbyNode["createPages"] = async ({
   actions,
   graphql,
 }) => {
+  // BUG REPRO DETAIL:
+
+  // 1. This query produces the bug, following the README steps
+
   const result = await graphql<{
     pages: { edges: { node: { frontmatter: object } }[] };
   }>(`
@@ -42,8 +46,30 @@ export const createPages: GatsbyNode["createPages"] = async ({
       }
     }
   `);
-
   const context = result.data?.pages.edges?.[0].node.frontmatter;
+
+  // 2. HOWEVER this query succeeds:
+  /* 
+  const result = await graphql<{ markdownRemark: { frontmatter: object } }>(`
+    {
+      markdownRemark(frontmatter: { slug: { eq: "home" } }) {
+        frontmatter {
+          slug
+          heading
+          image {
+            childImageSharp {
+              gatsbyImageData
+            }
+          }
+          alt
+        }
+      }
+    }
+  `);
+
+  const context = result?.data?.markdownRemark?.frontmatter;
+ */
+
   if (!context) {
     return Promise.reject(`query failed ${JSON.stringify(result, null, 2)}`);
   }
